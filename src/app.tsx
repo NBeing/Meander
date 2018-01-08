@@ -7,10 +7,10 @@ import MeanderCanvas from "./meander"
 
 function createDefaultMeanderConfig(){
   return {
-    sides        : 5,
-    flip         : false,
-    sideLength   : 550,
-    depth        : 6,
+    sides        : 3,
+    flip         : true,
+    sideLength   : 400,
+    depth        : 4,
     baseRotation : 0
   }
 }
@@ -72,8 +72,28 @@ export default class App extends React.Component<any, any> {
   }
 
   init(){
-    new MeanderCanvas('c', createDefaultMeanderConfig());
-    
+      /* new MeanderCanvas('c', createDefaultMeanderConfig());*/
+      /* new MeanderCanvas('c',{
+       *     sides        : 3,
+       *     flip         : false,
+       *     sideLength   : 400,
+       *     depth        : 4,
+       *     baseRotation : 0
+       * });*/
+      new MeanderCanvas('c',{
+          sides        : 5,
+          flip         : false,
+          sideLength   : 400,
+          depth        : 3,
+          baseRotation : 0
+      });
+      new MeanderCanvas('c',{
+          sides        : 5,
+          flip         : true,
+          sideLength   : 400,
+          depth        : 3,
+          baseRotation : 0
+      });
     this.merged$.subscribe( x => console.log(x));
     this.inputs = this.generateInputs();
     let node = this.configOptions.reduce((acc:any, cur:any) =>{

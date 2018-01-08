@@ -25,7 +25,9 @@
     "@types/react-hot-loader": "^3.0.0"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.92",
     "d3": "^3.5.12",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "rxjs": "^5.5.6"
   }
 }
