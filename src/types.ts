@@ -15,5 +15,10 @@ export type MeanderConfig = {
   flip         : boolean,
   sideLength   : number,
   depth        : number,
-  baseRotation : number
+  baseRotation : number,
+  base         : number,
+  numSegments  : number,
+  lineWidth    : number,
+  motifConfig  : any,
+  noAnimation  : boolean
 }

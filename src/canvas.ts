@@ -61,8 +61,8 @@ export default class CantorCanvas{
   }
   setup = (): void =>{
     this._canvas        = <HTMLCanvasElement>document.getElementById(this.selector)
-    this._canvas.width  = 2000//window.innerWidth
-    this._canvas.height = 2000//window.innerHeight
+    this._canvas.width  = window.innerWidth
+    this._canvas.height = window.innerHeight
     this.ctx            = this._canvas.getContext('2d')
     this.ctx.fillStyle  = "black";
     this.ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
