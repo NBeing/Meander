@@ -7,16 +7,17 @@ module.exports = {
     filename: 'bundle.js',
     path: __dirname
   },
+  devtool: 'eval-source-maps',
   module: {
     rules: [
       {
-        test: /\.ts(x?)$/,
-        loader: 'ts-loader',
-        exclude: /node_modules/,
-      },
+          test: /\.ts(x?)$/,
+          use: ['ts-loader'],
+          exclude: path.resolve(__dirname, "node_modules")
+        }
     ]
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"]
-  },
+  }
 };

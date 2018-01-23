@@ -16,32 +16,28 @@ export default class MeanderCanvas extends Canvas {
   lastX           : number
   lastY           : number
   clicks          : number
+  subs            : any
   constructor(
     selector       : string        ,
     config         : MeanderConfig ,
   ){
     super(selector)
     this.config = config
-    console.log("init with config", config);
     this.scaleFactor = 1.1;
     this.lastX = this.canvas.width/2;
     this.lastY = this.canvas.height/2;
     this.clicks = 0;
     this.init()
-
   }
   zoom = (clicks:any) => {
     // var pt = (this.ctx as any).transformedPoint(this.lastX,this.lastY)// ;
     // this.ctx.translate(pt.x,pt.y);
     if(clicks === -1){
-      console.log("Negativo")
       this.clicks = 0
     }
     this.clicks += clicks
-
     var factor = Math.pow(this.scaleFactor,this.clicks + clicks);
     this.ctx.scale(factor,factor);
-    // this.ctx.translate(-pt.x,-pt.y);
     this.draw();
   }
   resetClicks(){
@@ -51,7 +47,6 @@ export default class MeanderCanvas extends Canvas {
         this.ctx.scale(factor,factor);
         this.clicks -= 1;
       } else {
-        console.log("L")
         var factor = Math.pow(this.scaleFactor,1);
         this.ctx.scale(factor,factor);
         this.clicks += 1;
@@ -59,6 +54,7 @@ export default class MeanderCanvas extends Canvas {
     }
   }
   init(){
+    console.log("init", this.config)
     this.ctx.fillRect (0,0,this.canvas.width/2, this.canvas.height/2)
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
@@ -67,24 +63,21 @@ export default class MeanderCanvas extends Canvas {
     this.ctx.scale(0.15,0.15);
     this.ctx.transform(1,0,0,1,0,0)
 
-    document.addEventListener('keypress', (evt) => {
-      console.log("Key", evt)
-      evt.preventDefault();
-      // console.log("Which", evt.which)
-      if( evt.key === '0'){
-        console.log("Right")
-        evt.preventDefault();
-        this.resetClicks()
-      } else if (evt.key === '-'){
-        console.log("M UP")
-        this.zoom( -1 );
-      } else if ( evt.key === '+'){
-        this.zoom( 1 );
-      } else if ( evt.key === 'c'){
-        this.ctx.restore();
-        this.draw();
-      }
-    },false);
+    // document.addEventListener('keypress', (evt) => {
+    //   evt.preventDefault();
+    //   // console.log("Which", evt.which)
+    //   if( evt.key === '0'){
+    //     evt.preventDefault();
+    //     this.resetClicks()
+    //   } else if (evt.key === '-'){
+    //     this.zoom( -1 );
+    //   } else if ( evt.key === '+'){
+    //     this.zoom( 1 );
+    //   } else if ( evt.key === 'c'){
+    //     this.ctx.restore();
+    //     this.draw();
+    //   }
+    // },false);
 
     this.canvas.addEventListener('mousemove', (evt:any) => {
       this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
@@ -97,7 +90,7 @@ export default class MeanderCanvas extends Canvas {
   draw(){
     this.ctx.translate(-this.canvas.width /2 , -this.canvas.height/2 )
     this.ctx.fillStyle = "black"
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+    this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height);
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
     let savedPos = this.generateSpacing(this.config.sides).map((n:any,i:any, c:any) => {
@@ -105,31 +98,45 @@ export default class MeanderCanvas extends Canvas {
       let y  = this.config.sideLength * Math.cos(n)
       let x1 = this.config.sideLength * Math.sin((c[i+1])? c[i+1] : c[0])
       let y1 = this.config.sideLength * Math.cos((c[i+1])? c[i+1] : c[0])
-      let a  = (x1 - x)
-      let b  = (y1 - y)
+      let a  = ( x1 - x )
+      let b  = ( y1 - y )
       let slope = b/a
       let sideAngle = (a < 0) ? Math.PI + Math.atan(slope) : Math.atan(slope)
       return { x , y , sideAngle }
     })
 
     //let totalLength = this.config.sideLength * Math.pow(4/3, this.config.depth )
-    let numberOfSegments  = Math.pow( 4 , this.config.depth);
+    let source:any;
+    let numberOfSegments  = Math.pow( this.config.motifConfig.length , this.config.depth);
     let polygonSideLength = this.config.sideLength * 2 * Math.sin(this.angle/2)
     let segmentLength     = polygonSideLength * Math.pow((1/3), this.config.depth)
-    let source:any;
-    if(this.config.noAnimation){
-      source = Rx.Observable.from(range(this.config.numSegments ||  numberOfSegments))
-    } else {
-      source = Rx.Observable.interval(1).take(this.config.numSegments ||  numberOfSegments)
-    }
+    let numSegments       = (this.config.fitToSide) ? numberOfSegments :  this.config.numSegments
+    console.log("Num seg", numSegments)
 
-    range(this.config.sides).forEach((n:number) =>{
-      source.subscribe( (x:any) => {
+    source =
+      ( this.config.noAnimation )
+        ? Rx.Observable.from(range( numSegments ))
+        : Rx.Observable.interval(1).take(numSegments)
+
+    this.subs = range(this.config.sides).map((n:number) => {
+      return source.subscribe( (x:any) => {
         let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip)
+
         let newX = savedPos[n].x + getAxis('x')
         let newY = savedPos[n].y + getAxis('y')
 
-        this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3)
+        let dx     = getAxis('x') - savedPos[n].x;
+        let dy     = getAxis('y') - savedPos[n].y;
+        let slope  = dy/dx;
+        let rad    = Math.atan(slope)
+        let scale  = fn => Math.abs(Math.floor(fn(rad) * (255/Math.PI)));
+        let tan = scale(Math.tan);
+        let sin = scale(Math.sin);
+        let cos = scale(Math.cos);
+      //  console.log("Slope is...", slope, "Rad: " ,rad, "Scaled" , scale(Math.tan));
+
+        this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+                      `rgba(${sin},${cos},${tan},1)`)
 
         savedPos[n].x = newX;
         savedPos[n].y = newY;
@@ -138,10 +145,15 @@ export default class MeanderCanvas extends Canvas {
     })
 
   }
+  public cleanup(){
+    this.subs.forEach((x:any) => {
+      x.unsubscribe()
+    })
+  }
   triangulate =
     ( segmentLength:number, count:number, baseRotation:number, flip: boolean) =>
     (axis: string) => segmentLength * ( axis === 'x' ? Math.cos : Math.sin )
-  ((flip ? -1 : 1) * this.getAngleFromIndex( count, this.config.base ) + baseRotation  );
+                      ((flip ? -1 : 1) * this.getAngleFromIndex( count, this.config.motifConfig.length ) + baseRotation  );
 
   transformByAngle(input:number){
     if(input === 0 || input === 3){
@@ -175,15 +187,10 @@ export default class MeanderCanvas extends Canvas {
     }
   }
   getAngleFromMotifConfig( input:number){
-    try{
     return this.config.motifConfig[input]
-    } catch(e){
-      console.log(this.config)
-      console.log(e);
-    }
   }
   getAngleFromIndex(index:number, base:number){
-    // Convert to base4 and aget the corresponding angle
+    // Convert to base and get the corresponding angle
     return index.toString(base)
       .split('')
       .map( (x:any) => this.getAngleFromMotifConfig(parseInt(x)))

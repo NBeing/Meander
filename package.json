@@ -14,8 +14,7 @@
     "node-libs-browser": "^0.5.3",
     "ts-loader": "^3.2.0",
     "typescript": "^2.6.2",
-    "webpack": "^2.3.2",
-    "webpack-dev-server": "^2.4.2",
+    "webpack": "^3.10.0",
     "@types/react": "^15.0.0",
     "@types/react-dom": "^0.14.23",
     "node-sass": "^4.1.1",
@@ -29,6 +28,7 @@
     "@types/react-sidebar": "^2.2.2",
     "d3": "^3.5.12",
     "lodash": "^4.17.4",
+    "react-canvas-knob": "^0.4.0",
     "react-sidebar": "^2.3.2",
     "rxjs": "^5.5.6"
   }

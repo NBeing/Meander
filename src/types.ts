@@ -16,9 +16,19 @@ export type MeanderConfig = {
   sideLength   : number,
   depth        : number,
   baseRotation : number,
-  base         : number,
   numSegments  : number,
   lineWidth    : number,
   motifConfig  : any,
-  noAnimation  : boolean
+  noAnimation  : boolean,
+  fitToSide    : boolean
+}
+export type ConfigOption = {
+  optionName : string,
+  min        : number,
+  max        : number,
+  value      : any
+}
+export type OptionWithValue =  {
+  option: string,
+  value: string
 }
