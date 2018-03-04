@@ -1,5 +1,6 @@
 import { UPDATE_MOTIF, UPDATE_CONFIG } from "../actions/canvasActions"
 import { parseFloatByKey } from "../../util/util"
+
 // Default Motif Config
 const motif = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0]
 
@@ -20,31 +21,32 @@ export const defaultCanvasState = {
   config
 }
 
+const updateOptionInMeanderConfig =
+  ( state, payload ) => { 
+    return state.config.map( configOption => {
+      // If its the changed option
+      if( configOption.optionName === payload.config.option.optionName ) {
+        // Get value from slider or checkbox
+        configOption.value = ( payload.config.option.type === 'range' ) 
+                            ? parseInt(payload.config.value.value) 
+                            : payload.config.value.checked;
+      }
+      return configOption;
+    })
+  }
+
+
 export const canvasReducer = (state = defaultCanvasState, action) => {
   switch (action.type) {
+
     case UPDATE_MOTIF:
       let {index, value} = action.payload.motif;
-      var m = state.motif.map( (y,i) => (index === i) ? parseFloat(value): y)
-      return { ...state, ...{motif: m}}
-    case UPDATE_CONFIG:
-      const updateOptionInMeanderConfig =
-        ( optionName , value ) => {
-          return state.config.map( configOption => {
-            if( configOption.optionName === optionName ) {
-              configOption.value = value;
-            }
-            return configOption;
-          })
-        }
-     const getValFromConfig = 
-        configOption => ( configOption.option.type === 'range' ) 
-                          ? parseInt(configOption.value.value) 
-                          : configOption.value.checked;
+      let motif = state.motif.map(( y , i ) => (index === i) ? parseFloat(value) : y)
+      return { ...state, ...{motif}}
 
-      let option  = action.payload.config.option;
-      let val     = action.payload.config.value;
-      let y = updateOptionInMeanderConfig( option.optionName , getValFromConfig(action.payload.config));
-      return { ...state, ...{config: y}}
+    case UPDATE_CONFIG:
+      return { ...state, ...{config: updateOptionInMeanderConfig( state, action.payload)}}
+
     default:
       return state;
   }

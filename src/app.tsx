@@ -15,7 +15,7 @@ class App extends React.Component<any, any> {
   state$   : Rx.Observable<any> = from(store as any)
   canvasId : string             = 'c'
   meander  : any;
-  
+  stateSub : any;  
   constructor(props:any){
     super(props)
     this.props = props;
@@ -23,15 +23,17 @@ class App extends React.Component<any, any> {
   }
 
   init(){
-    this.state$
-      .map(createNodeFromStoreConfig)
-      .subscribe( state => this.handleCanvasEvent( state ))
+    this.stateSub = 
+      this.state$
+          .map(createNodeFromStoreConfig)
+          .subscribe( state => this.handleCanvasEvent( state ))
   }
 
   handleCanvasEvent(state){
       if(this.meander) this.meander.cleanup()
       this.meander = new MeanderCanvas(this.canvasId, state)
   }
+
   generateMotifInputs = () => {
     return range(8).map( (option:any, i:number ) =>{
       return (
@@ -39,12 +41,15 @@ class App extends React.Component<any, any> {
       )
     })
   }
+  
   generateInputs = () => {
     return (store.getState() as any).canvas.config.map( ( option:any ,i:number ) => (
       <ConfigSlider key={i} option={option} handleChange={this.props.onUpdateConfig} />
     ))
   }
-
+  componentWillUnmount(){
+    this.stateSub.unsubscribe();    
+  }
   render() {
     
     return (
