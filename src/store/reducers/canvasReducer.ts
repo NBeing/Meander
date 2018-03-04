@@ -1,5 +1,5 @@
-import { CLEAR_CANVAS, UPDATE_MOTIF, UPDATE_CONFIG } from "../actions/canvasActions"
-
+import { UPDATE_MOTIF, UPDATE_CONFIG } from "../actions/canvasActions"
+import { parseFloatByKey } from "../../util/util"
 // Default Motif Config
 const motif = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0]
 
@@ -16,19 +16,15 @@ const config =
   { optionName: 'fitToSide'   , min: 0 , max:1     , value: 1   , type: 'checkbox' }]
 
 export const defaultCanvasState = {
-  cleared: true,
   motif,
   config
 }
+
 export const canvasReducer = (state = defaultCanvasState, action) => {
   switch (action.type) {
-    case CLEAR_CANVAS:
-      console.log(action.payload.canvas)
-      action.payload.canvas.cleanup();
-      return { cleared: true};
     case UPDATE_MOTIF:
       let {index, value} = action.payload.motif;
-      var m = state.motif.map( (y,i) => (index === i) ? value: y)
+      var m = state.motif.map( (y,i) => (index === i) ? parseFloat(value): y)
       return { ...state, ...{motif: m}}
     case UPDATE_CONFIG:
       const updateOptionInMeanderConfig =
@@ -47,10 +43,7 @@ export const canvasReducer = (state = defaultCanvasState, action) => {
 
       let option  = action.payload.config.option;
       let val     = action.payload.config.value;
-      console.log("Option val", option, val)
       let y = updateOptionInMeanderConfig( option.optionName , getValFromConfig(action.payload.config));
-        console.log("Y", y)
-      console.log("Update conifg", action)
       return { ...state, ...{config: y}}
     default:
       return state;

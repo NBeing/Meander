@@ -19,5 +19,15 @@ export const hasKey = key => obj => obj[key]
 
 export const parseFloatByKey = key => obj => Object.assign({}, obj, { [key] :parseFloat(obj[key])})
 
-export const mergeDebounceDistinct = 
-  (obsA , obsB) => merge( obsA, obsB ).debounceTime(300).distinctUntilChanged()
+export const createNodeFromStoreConfig = 
+  state => Object.assign({}, 
+                        parseMeanderConfigToMeanderCanvasOptions(state.canvas.config),
+                        {motifConfig: state.canvas.motif});
+
+export const parseMeanderConfigToMeanderCanvasOptions =
+  config => config.reduce(this.addOption, {})
+
+export const addOption = (acc:any, cur:any) => {
+    acc[cur.optionName] = cur.value
+    return acc
+}
