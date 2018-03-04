@@ -3,17 +3,26 @@ import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import App from './app';
 
-render(<AppContainer><App /></AppContainer>, document.querySelector("#app"));
+import { Provider, connect } from 'react-redux';
+import { store } from './store/rootStore';
+
+render(<AppContainer>
+  <Provider store={store}>
+  <App />
+  </Provider>
+  </AppContainer>, document.querySelector("#app"));
 
 var module: any = module
 if (module && module['hot']) {
   module.hot.accept('./app', () => {
-    const App = require('./app').default;
     render(
-      <AppContainer>
-        <App />
-      </AppContainer>,
+      <Provider store={store}>
+        <AppContainer>
+          <App />
+        </AppContainer>
+      </Provider>,
       document.querySelector("#app")
     );
   });
 }
+

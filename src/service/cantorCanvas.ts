@@ -5,9 +5,9 @@ import Node             from "./node"
 import {
   tMatrix      ,
   CantorConfig
-}                       from "./types"
+}                       from "../util/types"
 import * as Rx          from 'rxjs'
-import Utils            from "./util"
+import Utils            from "../util/util"
 
 function sleep(ms:any) {
   return new Promise((resolve:any) => setTimeout(resolve, ms));

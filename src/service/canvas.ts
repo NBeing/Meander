@@ -1,4 +1,4 @@
-import {tMatrix} from "./types";
+import { tMatrix } from "../util/types";
 
 export default class CantorCanvas{
   protected  _canvas        : HTMLCanvasElement;
@@ -66,7 +66,5 @@ export default class CantorCanvas{
     this.ctx            = this._canvas.getContext('2d')
     this.ctx.fillStyle  = "black";
     this.ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
-
-    // this.transform(this.transformation);
   }
 }

@@ -4,9 +4,9 @@ import Node             from "./node"
 import {
   tMatrix      ,
   MeanderConfig
-}                       from "./types"
+}                       from "../util/types"
 import * as Rx          from 'rxjs'
-import Utils            from "./util"
+import Utils            from "../util/util"
 
 export default class MeanderCanvas extends Canvas {
   config          : MeanderConfig
@@ -88,7 +88,6 @@ export default class MeanderCanvas extends Canvas {
   }
 
   draw(){
-    this.ctx.translate(-this.canvas.width /2 , -this.canvas.height/2 )
     this.ctx.fillStyle = "black"
     this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height);
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
@@ -133,7 +132,6 @@ export default class MeanderCanvas extends Canvas {
         let tan = scale(Math.tan);
         let sin = scale(Math.sin);
         let cos = scale(Math.cos);
-      //  console.log("Slope is...", slope, "Rad: " ,rad, "Scaled" , scale(Math.tan));
 
         this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
                       `rgba(${sin},${cos},${tan},1)`)
@@ -155,37 +153,6 @@ export default class MeanderCanvas extends Canvas {
     (axis: string) => segmentLength * ( axis === 'x' ? Math.cos : Math.sin )
                       ((flip ? -1 : 1) * this.getAngleFromIndex( count, this.config.motifConfig.length ) + baseRotation  );
 
-  transformByAngle(input:number){
-    if(input === 0 || input === 3){
-      return 0
-    }
-    if(input === 1){
-      return Math.PI/3;
-    }
-    if(input === 2){
-      return -Math.PI/3;
-    }
-  }
-  transformByAngle2( input:number){
-    if(input === 0 || input === 3){
-      return 0
-    }
-    if(input === 1){
-      return Math.PI/2;
-    }
-    if(input === 2){
-      return -Math.PI/4;
-    }
-    if(input === 7 || input === 4){
-      return 0
-    }
-    if(input === 5){
-      return -Math.PI/3;
-    }
-    if(input === 6){
-      return -Math.PI/2;
-    }
-  }
   getAngleFromMotifConfig( input:number){
     return this.config.motifConfig[input]
   }

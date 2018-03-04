@@ -1,10 +1,10 @@
-import Canvas           from "./canvas"
 import { range }        from "lodash"
+import Canvas           from "./canvas"
 import Node             from "./node"
-import { tMatrix      ,
-         CantorConfig } from "./types"
-import * as R           from 'rxjs'
-import Utils            from "./util"
+import Utils            from "../util/util"
+import { tMatrix , CantorConfig } from "../util/types"
+
+
 
 export class CantorSet {
   root    : any;

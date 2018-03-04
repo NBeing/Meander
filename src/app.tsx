@@ -1,157 +1,122 @@
-import * as React from 'react';
-import * as Rx    from 'rxjs';
-import CantorCanvas from "./cantorCanvas"
-import MeanderCanvas from "./meander"
-import {range} from 'lodash'
-import { ConfigOption,
-         OptionWithValue } from "./types"
+// Library
+import * as React    from 'react';
+import * as Rx       from 'rxjs';
+import { connect }   from "react-redux";
+import { range}      from 'lodash'
+import { from }      from 'rxjs/observable/from';
 
-export default class App extends React.Component<any, any> {
-  inputs      : any;
-  motifInputs : any;
-  meander     : any;
+// Meat and potatoes
+import MeanderCanvas from "./service/meander"
 
-  meanderConfig: Array<any> =
-    [{ optionName: 'depth'       , min: 0 , max:7     , value: 3   , type: 'range'    },
-     { optionName: 'sides'       , min: 2 , max:25    , value: 7   , type: 'range'    },
-     { optionName: 'lineWidth'   , min: 0 , max:400   , value: 10  , type: 'range'    },
-     { optionName: 'sideLength'  , min: 2 , max:1200  , value: 300 , type: 'range'    },
-     { optionName: 'baseRotation', min: 0 , max:0     , value: 0   , type: 'range'    },
-     { optionName: 'numSegments' , min: 2 , max:20000 , value: 300 , type: 'range'    },
-     { optionName: 'flip'        , min: 0 , max:1     , value: 0   , type: 'checkbox' },
-     { optionName: 'noAnimation' , min: 1 , max:9     , value: 0   , type: 'checkbox' },
-     { optionName: 'fitToSide'   , min: 0 , max:1     , value: 1   , type: 'checkbox' },
-    ]
+// Redux Helpers
+import { store } from "./store/rootStore"
+import { clearCanvas, updateMotif, updateConfig } from "./store/actions/canvasActions"
 
-  motif                = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0];
+// View Components
+import { MotifSlider , ConfigSlider } from "./sliders"
+
+// Utilities
+import { hasKey, parseFloatByKey, mergeDebounceDistinct} from "./util/util"
+import { ConfigOption, OptionWithValue } from "./util/types"
+
+// Cool Configs
+/* node.motifConfig = [ 0,Math.PI/3,-Math.PI/3,0]
+ * node.motifConfig = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0];*/
+
+ class App extends React.Component<any, any> {
+  state$   : Rx.Observable<any> = from(store as any)
+  canvasId : string             = 'c'
+  meander  : any;
+  
   handleMotifChange    = ( optionValue: OptionWithValue ) => this.motifInput$.next(optionValue)
   handleChange         = ( optionValue: OptionWithValue ) => this.formInput$.next(optionValue)
 
-  motifInput$    : Rx.BehaviorSubject<any> = new Rx.BehaviorSubject(null);
-  formInput$     : Rx.BehaviorSubject<any> = new Rx.BehaviorSubject(null);
-  handlers$      : Rx.Observable<any>      = Rx.Observable.of({ handleChange: this.handleChange})
-  motifHandlers$ : Rx.Observable<any>      = Rx.Observable.of({ handleChange: this.handleMotifChange})
+  motifInput$    : Rx.BehaviorSubject<any> = new Rx.BehaviorSubject(null)
+  formInput$     : Rx.BehaviorSubject<any> = new Rx.BehaviorSubject(null)
+  handlers$      : Rx.Observable<any>      = Rx.Observable.of({ handleChange: this.handleChange      })
+  motifHandlers$ : Rx.Observable<any>      = Rx.Observable.of({ handleChange: this.handleMotifChange })
 
   motif$: Rx.Observable<any> =
-    Rx.Observable.merge( this.motifInput$ , this.motifHandlers$)
-      .debounceTime(300)
-      .distinctUntilChanged()
-      .filter( x => x.value)
-      .map( x => { x.value = parseFloat(x.value); return x;})
-      .map((x: any) => {
-        console.log("Got motif...", x);
-        this.motif[x.option] = x.value;
-        this.canvas$.next({event: 'update'});
-      })
-
-  canvas$: any =
-    new Rx.BehaviorSubject({event: 'init'}).map((e:any) => this.handleCanvasEvent(e));
+    mergeDebounceDistinct( this.motifInput$ , this.motifHandlers$ )
+      .filter(hasKey('value'))
+      .map(parseFloatByKey('value'))
+      .map(this.props.onUpdateMotif)
 
   merged$: Rx.Observable<any> =
-    Rx.Observable.merge(
-      this.formInput$,
-      this.handlers$
-    )
-      .debounceTime(300)
-      .distinctUntilChanged()
-      .filter( x => x && x.option)
-      .map((x:any) => {
-        let val = ( x.option.type === 'range' ) ? parseInt(x.value.value) : x.value.checked;
-        this.updateOptionInMeanderConfig( x.option.optionName , val );
-        this.canvas$.next({event: 'update'});
-      });
+    mergeDebounceDistinct( this.formInput$, this.handlers$ )
+      .filter(hasKey('option'))
+      .map(this.props.onUpdateConfig);
 
   constructor(props:any){
     super(props)
+    this.props = props;
     this.init()
   }
+
   init(){
-    this.inputs      = this.generateInputs();
-    this.motifInputs = this.generateMotifInputs();
-    this.canvas$.subscribe();
     this.merged$.subscribe();
     this.motif$.subscribe();
+    this.state$.subscribe( state => this.handleCanvasEvent( state ))
   }
 
-  getOptionFromMeanderConfig =
-    optionName => this.meanderConfig.filter( option => option.optionName == optionName );
-
-  updateOptionInMeanderConfig =
-    ( optionName , value ) => {
-      this.meanderConfig = this.meanderConfig.map( configOption => {
-        if( configOption.optionName === optionName ) {
-          configOption.value = value;
-        }
-        return configOption;
-      })
-    }
   parseMeanderConfigToMeanderCanvasOptions =
-    () => this.meanderConfig.reduce((acc:any, cur:any) =>{
-      acc[cur.optionName] = cur.value;
-      return acc;
-    }, {})
+    config => config.reduce(this.addOption, {})
 
-  handleCanvasEvent(e){
-    switch (e.event) {
-      case 'init':
-        let n = this.parseMeanderConfigToMeanderCanvasOptions();
-        n.motifConfig = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0];
-        this.meander = new MeanderCanvas('c', n ) ;
-        break;
-      case 'cleanup':
-        this.meander.cleanup();
-        break;
-      case 'update':
-        this.meander.cleanup();
-        let node = this.parseMeanderConfigToMeanderCanvasOptions();
-        /* node.motifConfig = [ 0,Math.PI/3,-Math.PI/3,0]
-         * node.motifConfig = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0];*/
-        node.motifConfig = this.motif;
-        console.log("Using motif", this.motif);
-        this.meander = new MeanderCanvas('c', node)
-        break;
-    }
+  addOption = (acc:any, cur:any) => {
+    acc[cur.optionName] = cur.value
+    return acc
   }
-  generateMotifInputs = (node?: any) =>{
-    return range(8).map( (option:any, i:any) =>{
+  createNodeFromStore 
+    = state => Object.assign({}, 
+      this.parseMeanderConfigToMeanderCanvasOptions(state.canvas.config),
+      {motifConfig: state.canvas.motif});
+
+  handleCanvasEvent(state){
+      if(this.meander) this.meander.cleanup();
+      this.meander = 
+        new MeanderCanvas(this.canvasId, this.createNodeFromStore(state))
+  }
+  generateMotifInputs = () => {
+    return range(8).map( (option:any, i:number ) =>{
       return (
-        <div key={i} className="inputs">
-          <input id={i}
-            type="range"
-            min={-360}
-            max={360}
-            onChange={(e:any) => this.handleMotifChange({ option: i ,
-                                                          value: e.target.value })} />
-        </div>
+        <MotifSlider index={i} key={i} handleMotifChange={this.handleMotifChange} />
       )
     })
   }
-  generateInputs = (node?:any) =>{
-    return this.meanderConfig.map( ( option:any ,i:any ) => {
-      return (
-          <div key={i} className="inputs">
-          <label>{option.optionName}</label>
-          <input id={option.optionName}
-                 type={option.type}
-                 min={option.min}
-                 max={option.max}
-                 onChange={(e:any) => this.handleChange({ option, value: e.target})}
-          />
-          </div>)
-    })}
+  generateInputs = () => {
+    return (store.getState() as any).canvas.config.map( ( option:any ,i:number ) => (
+      <ConfigSlider key={i} option={option} handleChange={this.handleChange} />
+    ))
+  }
+  onCanvasClear = () => {
+    this.props.onCanvasClear(this.meander)
+  }
 
   render() {
-
+    
     return (
       <div>
-        <canvas id="c"></canvas>
-        <div className="input-container">
-          {this.inputs}
-        </div>
-        <div className="input-container">
-          {this.motifInputs}
-        </div>
+          <canvas id={this.canvasId}></canvas>
+          <div className="input-container">
+              {this.generateInputs()}
+          </div>
+          <div className="input-container">
+              {this.generateMotifInputs()}
+          </div>
       </div>
     )
   }
 }
+
+const mapStateToProps = state => ({
+  products: state.products,
+  users: state.users,
+  canvas: state.canvas
+})
+
+const mapActionsToProps = {
+  onCanvasClear: clearCanvas,
+  onUpdateMotif: updateMotif,
+  onUpdateConfig: updateConfig
+}
+export default connect(mapStateToProps, mapActionsToProps)(App)
