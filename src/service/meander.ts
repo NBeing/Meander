@@ -17,6 +17,10 @@ export default class MeanderCanvas extends Canvas {
   lastY           : number
   clicks          : number
   subs            : any
+  offset          : any
+  lastTransX      : any 
+  lastTransY      : any
+
   constructor(
     selector       : string        ,
     config         : MeanderConfig ,
@@ -26,35 +30,38 @@ export default class MeanderCanvas extends Canvas {
     this.scaleFactor = 1.1;
     this.lastX = this.canvas.width/2;
     this.lastY = this.canvas.height/2;
+    this.lastTransX = this.lastX;
+    this.lastTransY= this.lastY;
     this.clicks = 0;
+    this.offset = [null,null];
     this.init()
   }
-  zoom = (clicks:any) => {
-    // var pt = (this.ctx as any).transformedPoint(this.lastX,this.lastY)// ;
-    // this.ctx.translate(pt.x,pt.y);
-    if(clicks === -1){
-      this.clicks = 0
-    }
-    this.clicks += clicks
-    var factor = Math.pow(this.scaleFactor,this.clicks + clicks);
-    this.ctx.scale(factor,factor);
-    this.draw();
-  }
-  resetClicks(){
-    while(this.clicks !== 0){
-      if(this.clicks >= 0){
-        var factor = Math.pow(this.scaleFactor,-1);
-        this.ctx.scale(factor,factor);
-        this.clicks -= 1;
-      } else {
-        var factor = Math.pow(this.scaleFactor,1);
-        this.ctx.scale(factor,factor);
-        this.clicks += 1;
-      }
-    }
-  }
+  // zoom = (clicks:any) => {
+  //   // var pt = (this.ctx as any).transformedPoint(this.lastX,this.lastY)// ;
+  //   // this.ctx.translate(pt.x,pt.y);
+  //   if(clicks === -1){
+  //     this.clicks = 0
+  //   }
+  //   this.clicks += clicks
+  //   var factor = Math.pow(this.scaleFactor,this.clicks + clicks);
+  //   this.ctx.scale(factor,factor);
+  //   this.draw();
+  // }
+  // resetClicks(){
+  //   while(this.clicks !== 0){
+  //     if(this.clicks >= 0){
+  //       var factor = Math.pow(this.scaleFactor,-1);
+  //       this.ctx.scale(factor,factor);
+  //       this.clicks -= 1;
+  //     } else {
+  //       var factor = Math.pow(this.scaleFactor,1);
+  //       this.ctx.scale(factor,factor);
+  //       this.clicks += 1;
+  //     }
+  //   }
+  // }
   init(){
-    console.log("init", this.config)
+    //console.log("init", this.config)
     this.ctx.fillRect (0,0,this.canvas.width/2, this.canvas.height/2)
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
@@ -63,34 +70,29 @@ export default class MeanderCanvas extends Canvas {
     this.ctx.scale(0.15,0.15);
     this.ctx.transform(1,0,0,1,0,0)
 
-    // document.addEventListener('keypress', (evt) => {
-    //   evt.preventDefault();
-    //   // console.log("Which", evt.which)
-    //   if( evt.key === '0'){
-    //     evt.preventDefault();
-    //     this.resetClicks()
-    //   } else if (evt.key === '-'){
-    //     this.zoom( -1 );
-    //   } else if ( evt.key === '+'){
-    //     this.zoom( 1 );
-    //   } else if ( evt.key === 'c'){
-    //     this.ctx.restore();
-    //     this.draw();
-    //   }
-    // },false);
+    this.ctx.fillStyle = "black"
+    this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height)
 
-    this.canvas.addEventListener('mousemove', (evt:any) => {
+    this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
+
+    this.canvas.addEventListener('click', (evt:any) => {
+
       this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
       this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
+      this.offset = [this.lastX, this.lastY];
+      this.ctx.translate( this.lastX - this.canvas.width /2 , this.lastY - this.canvas.height /2 )
+
+      this.ctx.fillStyle = 'red';
+      this.ctx.fillRect(0,0,10, 10)
+      //console.log("Cleeeek", this.offset);
+      this.draw();
     })
     this.angle   = ((Math.PI * 2) / this.config.sides)
     this.draw();
   }
 
   draw(){
-    this.ctx.fillStyle = "black"
-    this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height);
-    this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
+
 
     let savedPos = this.generateSpacing(this.config.sides).map((n:any,i:any, c:any) => {
       let x  = this.config.sideLength * Math.sin(n)
@@ -110,8 +112,7 @@ export default class MeanderCanvas extends Canvas {
     let polygonSideLength = this.config.sideLength * 2 * Math.sin(this.angle/2)
     let segmentLength     = polygonSideLength * Math.pow((1/3), this.config.depth)
     let numSegments       = (this.config.fitToSide) ? numberOfSegments :  this.config.numSegments
-    console.log("Num seg", numSegments)
-
+    
     source =
       ( this.config.noAnimation )
         ? Rx.Observable.from(range( numSegments ))
