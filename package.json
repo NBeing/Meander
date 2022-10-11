@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "D3.js ES6 Webpack boilerplate",
   "scripts": {
-    "server": "webpack-dev-server",
+    "server": "webpack serve",
     "cli": "webpack serve --mode development --open"
   },
   "devDependencies": {
@@ -19,7 +19,6 @@
     "browser-sync-webpack-plugin": "^1.0.1",
     "html-webpack-plugin": "^4.5.2",
     "node-libs-browser": "^0.5.3",
-    "node-sass": "^4.1.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-hot-loader": "^3.0.0-beta.6",
