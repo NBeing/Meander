@@ -6,7 +6,6 @@ import {
   tMatrix      ,
   CantorConfig
 }                       from "../util/types"
-import * as Rx          from 'rxjs'
 import Utils            from "../util/util"
 
 function sleep(ms:any) {
@@ -32,7 +31,7 @@ export default class CantorCanvas extends Canvas {
   }
   generateCantorSet(){
     return new CantorSet( new Node(null), //Empty node as the ROOT
-                          this.config.depth,  // depth
+                          this.config.depth || 1,  // depth
                           this.config.divisions,  // # of times to divide set
                           this.polygonLength ) // pixel length of initial guy
   }

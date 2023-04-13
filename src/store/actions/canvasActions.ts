@@ -11,8 +11,6 @@ export const updateMotif = ( motif ) => {
 }}
 
 export const updateConfig = ( config ) => { 
-  console.log("Updating config", config)
-
   return {
   type: UPDATE_CONFIG,
   payload: {

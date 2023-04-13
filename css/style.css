@@ -1,23 +1,28 @@
 .container {
   display:flex;
-  background-color: "red";
 }
-body{
-  background-color: "red";
+body {
+  margin: 0px;
+  background-color: black;
+  overflow-x: hidden;
 }
 .inputs {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
-
+.config-container {
+  position: absolute;
+  top: 20px;
+  left: 0px;
+  background-color: rgba(0,0,0,0);
+}
 .input-container {
   display: flex;
   flex-direction: row;
   margin: auto;
   flex-wrap: wrap;
   flex-flow: row wrap;
-  background-color: black;
   align-items: center;
 }
 
@@ -38,11 +43,6 @@ body{
   color: grey;
 }
 
-body {
-  margin: 0px;
-  background-color: black;
-  overflow-x: hidden;
-}
 
 input[type=range] {
   -webkit-appearance: none;

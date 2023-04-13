@@ -5,6 +5,7 @@ import App from './app';
 
 import { Provider, connect } from 'react-redux';
 import { store } from './store/rootStore';
+import '../css/style.css';
 
 render(<AppContainer>
   <Provider store={store}>

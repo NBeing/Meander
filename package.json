@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "D3.js ES6 Webpack boilerplate",
   "scripts": {
-    "server": "webpack serve",
+    "start": "webpack serve",
     "cli": "webpack serve --mode development --open"
   },
   "devDependencies": {
     "@types/node": "^9.3.0",
-    "@types/react": "^15.0.0",
+    "@types/react": "^16.0.0",
     "@types/react-dom": "^0.14.23",
     "@types/react-hot-loader": "^3.0.0",
     "@webpack-cli/init": "^1.1.3",
@@ -17,11 +17,13 @@
     "babel-preset-es2015": "^6.0.15",
     "browser-sync": "^2.10.1",
     "browser-sync-webpack-plugin": "^1.0.1",
+    "css-loader": "5.2.7",
     "html-webpack-plugin": "^4.5.2",
     "node-libs-browser": "^0.5.3",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-hot-loader": "^3.0.0-beta.6",
+    "style-loader": "^2.0.0",
     "ts-loader": "^4.4.2",
     "typescript": "^3.5.1",
     "webpack": "^4.32.2",

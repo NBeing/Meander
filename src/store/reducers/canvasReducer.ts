@@ -1,7 +1,6 @@
 import { UPDATE_MOTIF, 
         UPDATE_CONFIG,
         UPDATE_ALL_CONFIG } from "../actions/canvasActions"
-import { parseFloatByKey } from "../../util/util"
 
 // Default Motif Config
 const motif = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0]
@@ -15,7 +14,7 @@ const config =
   { optionName: 'baseRotation', min: 0 , max:0     , value: 0     , type: 'range'    },
   { optionName: 'numSegments' , min: 2 , max:20000 , value: 300   , type: 'range'    },
   { optionName: 'flip'        , min: 0 , max:1     , value: false , type: 'checkbox' },
-  { optionName: 'noAnimation' , min: 1 , max:9     , value: true , type: 'checkbox' },
+  { optionName: 'noAnimation' , min: 1 , max:9     , value: false , type: 'checkbox' },
   { optionName: 'fitToSide'   , min: 0 , max:1     , value: false , type: 'checkbox' }]
 
 export const defaultCanvasState = { motif, config }
@@ -26,7 +25,7 @@ const updateOptionInMeanderConfig =
       // If its the changed option
       if( configOption.optionName === payload.config.option.optionName ) {
         // Get value from slider or checkbox
-        //console.log("Looking at", configOption);
+        console.log("Looking at", configOption, payload);
         configOption.value = ( payload.config.option.type === 'range' ) 
                               ? parseInt(payload.config.value.value) 
                               : payload.config.value.checked;

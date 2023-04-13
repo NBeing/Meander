@@ -13,10 +13,17 @@ module.exports = {
   devtool: 'eval-source-maps',
   module: {
     rules: [
-      {
+        {
           test: /\.ts(x?)$/,
           use: ['ts-loader'],
           exclude: path.resolve(__dirname, "node_modules")
+        },
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader'
+          ]
         }
     ]
   },
