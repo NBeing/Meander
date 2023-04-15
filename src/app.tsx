@@ -1,4 +1,5 @@
 // Library
+import * as hot from 'react-hot-loader';
 import * as React    from 'react';
 import * as Rx       from 'rxjs';
 import { connect }   from "react-redux";
