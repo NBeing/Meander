@@ -1,73 +1,74 @@
-import * as React from 'react';
-import { connect }   from "react-redux";
+import * as React from 'react'
+import { useDispatch, useSelector }   from "react-redux"
 import { range }     from 'lodash'
 
-import { store }     from "../store/rootStore"
-import { updateMotif, updateConfig, updateAllConfig  } from "../store/actions/canvasActions"
-import { updateUI } from '../store/actions/uiActions';
+import { UPDATE_UI }  from '../store/actions/uiActions'
 import { MotifSlider , ConfigSlider } from "../sliders"
 
-class Config extends React.Component<any, any> {
-  constructor(props){
-    super(props)
-  }
-    generateInputs = () => {
-    return (store.getState() as any).canvas.config.map( ( option:any ,i:number ) => (
-      <ConfigSlider key={i} option={option} handleChange={this.props.onUpdateConfig} />
+import { 
+  RootState, 
+  UIConfig, 
+  MotifDefinition, 
+  MotifModOptions 
+} from "../types"
+
+const Config = (props) => {
+  const uiConfig:UIConfig =
+    useSelector((state:RootState) => state.config)
+  
+  const motifAngles:MotifDefinition =
+    useSelector((state:RootState) => state.motifOptions.motifAngles)
+
+  const motifModOptions:MotifModOptions =
+    useSelector((state:RootState) => state.motifOptions.motifModOptions)
+
+  const dispatch = useDispatch()
+  
+  const generateInputs = () => {
+    return motifModOptions.map( ( option:any ,i:number ) => (
+      <ConfigSlider key={i} option={option} />
     ))
   }
-  generateMotifInputs = () => {
-
+  const generateMotifInputs = () => {
     return range(8).map( (option:any, i:number ) =>{
       return (
-          <MotifSlider index={i} key={i} displayValue={this.props.canvas.motif[i]} handleMotifChange={this.props.onUpdateMotif} />
+          <MotifSlider 
+            option={option} 
+            index={i} 
+            key={i} 
+            displayValue={motifAngles[i]} />
       )
     })
   }
-  UIWindow = () => { 
-    return (
-      <div className="config-container">
-        {/* {this.getFunButton()} */}
-        <div className="input-container">
-            {this.generateInputs()}
-        </div>
-        <div className="input-container">
-            {this.generateMotifInputs()}
-        </div>
-      </div>
-  )}
 
-  onToggleConfig = () => {
-    this.props.onUpdateUI(!this.props.config.showOptions)
+  const onToggleConfig = () => {
+    dispatch({
+      type: UPDATE_UI, 
+      payload: {showOptions: !uiConfig.showOptions }
+    })
   }
-  render(){
-    console.log("Render container")
-    return( 
+
+  return( 
       
-      <div className="config-container">
-        <button 
-          id="toggle"
-          onClick={ this.onToggleConfig }>Show/Hide
-        </button>
+    <div className="config-container">
+      <button 
+        id="toggle"
+        onClick={ onToggleConfig }>Show/Hide
+      </button>
 
-        {this.props.config.showOptions ? <this.UIWindow/> : null }
-      </div>
-    )
-  }
+      {uiConfig.showOptions ? 
+            <div className="config-container">
+            {/* {this.getFunButton()} */}
+            <div className="input-container">
+                {generateInputs()}
+            </div>
+            <div className="input-container">
+                {generateMotifInputs()}
+            </div>
+          </div>
+     : null }
+    </div>
+  )
 }
 
-
-  const mapStateToProps = state => ({
-    canvas: state.canvas,
-    config: state.config
-
-  })
-  
-  const mapActionsToProps = {
-    onUpdateMotif    : updateMotif,
-    onUpdateConfig   : updateConfig,
-    onUpdateAllConfig: updateAllConfig,
-    onUpdateUI       : updateUI,
-
-  }
-  export default connect(mapStateToProps, mapActionsToProps)(Config)
+export default Config;

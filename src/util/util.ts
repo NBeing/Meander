@@ -29,6 +29,6 @@ export const parseMeanderConfigToMeanderCanvasOptions =
 
 export const createNodeFromStoreConfig = 
   state => Object.assign({}, 
-                        parseMeanderConfigToMeanderCanvasOptions(state.canvas.config),
-                        {motifConfig: state.canvas.motif});
+                        parseMeanderConfigToMeanderCanvasOptions(state.motifOptions.motifModOptions),
+                        {motifConfig: state.motifOptions.motifAngles});
 

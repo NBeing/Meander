@@ -1,52 +1,88 @@
 import * as React    from 'react';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { UPDATE_CONFIG, UPDATE_MOTIF } from './store/actions/canvasActions';
 
-export class ConfigSlider extends React.Component {
-  props:any;
-  constructor(props:any) {
-    super(props);
-    this.props = props;
-  }
-  // TODO
-  debouncedHandleChange = (option, e) => {
-    this.props.handleChange({ option: option, value: e.target})
-  }
+const useSlider = (type, min, max, defaultState, step, label, id, index) => {
+  const [state, setSlide] = useState(defaultState);
+  const dispatch = useDispatch()
 
-  render(){
-    return (
-      <div className="inputs">
-          <label>{this.props.option.optionName}</label>
-          <input id   ={this.props.option.optionName }
-                 type ={this.props.option.type       }
-                 min  ={this.props.option.min        }
-                 max  ={this.props.option.max        }
-                 onChange={(e:any) => this.debouncedHandleChange(this.props.option, e)}
-          />
+  const handleChange = e => {
+    setSlide(e.target.value);
+    dispatch({
+      type: UPDATE_MOTIF, 
+      payload: { index: index, value: e.target.value }
+    })
+  }
+  const props = { 
+    type,
+    id,
+    min,
+    max,
+    step,
+    value: state,
+    onChange: handleChange
+  }
+  return props
+}
+const useConfigSlider = (type, min, max, defaultState, step, label, id, index, option, onUpdate) => {
+  const [state, setSlide] = useState(defaultState);
+  const dispatch = useDispatch()
+
+  const handleChange = e => {
+    let value 
+    if(type == "checkbox"){
+
+      value = e.target.checked
+    } else {
+      value = e.target.value
+    }
+    setSlide(value);
+    dispatch({
+      type: UPDATE_CONFIG, 
+      payload: { option: option, value }
+    })
+    // onUpdate()
+  }
+  const props = { 
+    type,
+    id,
+    min,
+    max,
+    step,
+    value: state,
+    onChange: handleChange
+  }
+  return props
+}
+export function ConfigSlider(props){
+  const sliderProps = useConfigSlider(
+    props.option.type, 
+    props.option.min, 
+    props.option.max, 
+    props.option.value, 
+    1,
+    props.option.label, 
+    props.option.id, 
+    props.option.index,
+    props.option,
+    props.renderCanvas,
+  );
+  return (
+    <div className="inputs">
+      <label>{props.option.optionName}</label>
+      <label>({props.option.value})</label>
+          <input {...sliderProps}/>
       </div>
-    )
-  }
+  )
 }
 
-export class MotifSlider extends React.Component {
-  props:any;
-  constructor(props:any) {
-    super(props);
-    this.props = props;
-  }
-  radiansToAngle(radians){
-    // 1rad × 180/π = 57.296°
-    return radians * 180/Math.PI;
-  }
-  render(){
-    return (
-      <div className="inputs">
-          <label>Position : {this.props.index} Angle: {this.props.displayValue.toFixed(1)}</label>
-          <input id={this.props.index}
-                 type="range"
-                 min={-360}
-                 max={360}
-                 onChange={(e:any) => this.props.handleMotifChange({ index: this.props.index,
-                                                                     value: e.target.value })} />
-      </div>
-    )
-  }
+export function MotifSlider(props){
+  const sliderProps = useSlider("range", -360, 360, 0, 0.5,"Threshold", 'threshold', props.index);
+  return (
+    <div className="inputs">
+      <label>Position : {props.index} Angle: {props.displayValue.toFixed(1)}</label>
+       <input {...sliderProps }/>
+    </div>
+  )
 }
