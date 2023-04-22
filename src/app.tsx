@@ -7,17 +7,32 @@ import { store }     from "./store/rootStore"
 import MeanderCanvas from "./service/meander"
 import { createNodeFromStoreConfig     } from "./util/util"
 import Config from "./components/ConfigComponent"
+import LFO from "./util/LFO"
+import { useDispatch } from 'react-redux';
+import { UPDATE_MOTIF, UPDATE_ALL_MOTIFS, UPDATE_CONFIG } from './store/actions/canvasActions';
 
 
 const App = (props) => {
-  const canvasId  : string = 'c'
-  let stateSub  : any; 
-  let state$    : Rx.Observable<any> = from(store as any)
+  const canvasId : string = 'c'
+  let stateSub   : any; 
+  let state$     : Rx.Observable<any> = from(store as any)
   let meander;
-
+  const dispatch = useDispatch();
+  
   const handleCanvasEvent = (state) => {
-    if(meander) meander.cleanup()
-    meander = new MeanderCanvas(canvasId, state)
+    if(!meander){
+      meander = new MeanderCanvas(canvasId, state)
+    } else {
+
+      // meander.clearCanvas();
+      // meander.update(state);
+      meander = new MeanderCanvas(canvasId, state)
+    }
+
+    // if(meander) meander.cleanup()
+    // // console.log("New")
+    // meander = new MeanderCanvas(canvasId, state)
+
   }
 
   React.useEffect(() => {
@@ -29,6 +44,97 @@ const App = (props) => {
           return handleCanvasEvent( state )
         })
 
+    const myLFO = new LFO(1, 360, 960);
+    const myLFO2 = new LFO(1, 360, 8);
+    const myLFO3 = new LFO(1, 1000, 480);
+    const myLFO4 = new LFO(1, 2000, 30);
+    const colorLFORed = new LFO(0,255,30);
+    const colorLFOGreen = new LFO(0,255,10);
+    const colorLFOBlue = new LFO(0,255,5);
+
+    window.requestAnimationFrame(() => {
+        // console.log("myLFO", myLFO.getSin());      
+    })
+    window.requestAnimationFrame(function(){
+      mainLoop();
+    });
+    // Redraws the canvas with the browser framerate
+    function mainLoop(){
+      // console.log("myLFO", myLFO.getSin());      
+      // const configMod = [
+      //   myLFO3.getSin() / 2, 
+      //   myLFO3.getSin() / 3,
+      //   myLFO3.getSin() / 4,
+      //   myLFO3.getSin() / 5,
+      //   myLFO3.getSin() / 2,
+      //   myLFO3.getSin() / 3,
+      //   myLFO3.getSin() / 4,
+      //   myLFO3.getSin() / 5,
+      // ]
+      // dispatch({
+      //   type: UPDATE_ALL_MOTIFS, 
+      //   payload: [ 
+      //     myLFO3.getSin() + configMod[0], 
+      //     myLFO3.getSin() + configMod[1],
+      //     myLFO3.getSin() + configMod[2],
+      //     myLFO3.getSin() + configMod[3],
+      //     myLFO3.getSin() + configMod[4],
+      //     myLFO3.getSin() + configMod[5],
+      //     myLFO3.getSin() + configMod[6],
+      //     myLFO3.getSin() + configMod[7],
+      //   ]
+      // })
+      // dispatch({
+      //   type: UPDATE_CONFIG, 
+      //   payload:{
+      //   option:           
+      //     { optionName: 'sideLength'  , min: 2 , max:1200  , value: 300   , type: 'range' },
+      //     value: myLFO4.getSin()
+      // }
+      // })
+
+      // dispatch({
+      //   type: UPDATE_CONFIG, 
+      //   payload:{
+      //   option:           
+      //     { optionName: 'red'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //     value: colorLFORed.getSin()
+      // }
+      // })
+      // dispatch({
+      //   type: UPDATE_CONFIG, 
+      //   payload:{
+      //   option:           
+      //     { optionName: 'green'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //     value: colorLFOGreen.getSin(),
+      // }
+      // })
+      // dispatch({
+      //   type: UPDATE_CONFIG, 
+      //   payload:{
+      //   option:           
+      //     { optionName: 'blue'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //     value: colorLFOBlue.getSin(),
+      // }
+      // })
+      // dispatch({
+      //   type: UPDATE_CONFIG, 
+      //   payload:{
+      //   option: {
+      //       max: 20000,
+      //       min: 2,
+      //       optionName: "numSegments",
+      //       type: "range",
+      //       value: 1057,
+      //     },
+      //     value: myLFO2.getSin()
+      // }
+      // })
+        window.requestAnimationFrame(function(){
+        mainLoop();
+      });
+    }
+    
   }, []);
   //   updatePropInConfig = ( _config, prop , value) =>{
   //     let _sides = _config.map( option => { 

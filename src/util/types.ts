@@ -20,7 +20,10 @@ export type MeanderConfig = {
   lineWidth    : number,
   motifConfig  : any,
   noAnimation  : boolean,
-  fitToSide    : boolean
+  fitToSide    : boolean,
+  red          : number,
+  green        : number,
+  blue         : number,
 }
 export type ConfigOption = {
   optionName : string,

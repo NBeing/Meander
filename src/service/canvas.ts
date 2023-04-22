@@ -43,17 +43,19 @@ export default class CantorCanvas{
     this.context.stroke()
   }
 
-  drawCircle( xPos:number, yPos:number, size:number, radians:number, color:string ){
+  drawCircle( xPos:number, yPos:number, size:number, radians:number, color:string, strokeWeight: number ){
 
     this.ctx.strokeStyle = color
 
-    this.ctx.arc( xPos    ,
-                  yPos    ,
-                  size    ,
-                  0       ,
-                  radians ,
-                  false   )
-
+    this.ctx.arc(
+      xPos    ,
+      yPos    ,
+      size    ,
+      0       ,
+      radians ,
+      false   
+    )
+    this.ctx.lineWidth = strokeWeight
     this.ctx.stroke()
   }
   transform = ( matrix:tMatrix ) => {

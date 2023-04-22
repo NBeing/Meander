@@ -7,11 +7,13 @@ import { Provider, connect } from 'react-redux';
 import { store } from './store/rootStore';
 import '../css/style.css';
 
-render(<AppContainer>
-  <Provider store={store}>
-  <App />
-  </Provider>
-  </AppContainer>, document.querySelector("#app"));
+render(
+  <AppContainer>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </AppContainer>, document.querySelector("#app")
+);
 
 var module: any = module
 if (module && module['hot']) {

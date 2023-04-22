@@ -34,6 +34,8 @@ export default class MeanderCanvas extends Canvas {
     this.lastTransY= this.lastY;
     this.clicks = 0;
     this.offset = [null,null];
+    // this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
+
     this.init()
   }
   // zoom = (clicks:any) => {
@@ -60,8 +62,12 @@ export default class MeanderCanvas extends Canvas {
   //     }
   //   }
   // }
+  update(config){
+    this.config = config;
+    this.init()    
+  }  
   init(){
-    //console.log("init", this.config)
+    // console.log("i nit", this.config)
     this.ctx.fillRect (0,0,this.canvas.width/2, this.canvas.height/2)
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
@@ -120,8 +126,13 @@ export default class MeanderCanvas extends Canvas {
 
     this.subs = range(this.config.sides).map((n:number) => {
       return source.subscribe( (x:any) => {
-        let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip)
 
+        // let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip)
+        const angleDict = range(0, this.config.sides + 1, 1).map( x => {
+          return this.getAngleFromIndex( x, this.config.motifConfig.length )
+        })
+        // console.log("Angle dict", angleDict)
+        let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip, angleDict)
         let newX = savedPos[n].x + getAxis('x')
         let newY = savedPos[n].y + getAxis('y')
 
@@ -137,12 +148,47 @@ export default class MeanderCanvas extends Canvas {
         this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
                       `rgba(${sin},${cos},${tan},1)`)
 
+        // const color = this.Motifs[this.getMotifColor(x) - 1]
+        // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+        //   `rgba(${color.r},${color.g},${color.b},1)`)
+        // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+        //   `rgba(${this.config.red},${this.config.green},${this.config.blue},1)`)
+    
+        // this.drawCircle(savedPos[n].x, savedPos[n].y,100,Math.PI , `rgba(${255},${cos},${tan},0.5)`, this.config.lineWidth);
         savedPos[n].x = newX;
         savedPos[n].y = newY;
 
       })
     })
-
+  }
+  // Motifs = [
+  //   {r: 255, g: 0,   b: 255},
+  //   {r: 0,   g: 10,  b: 0},
+  //   {r: 255, g: 0,   b: 255},
+  //   {r: 128, g: 20, b: 0},
+  //   {r: 255, g: 128, b: 128},
+  //   {r: 255, g: 255, b: 255},
+  // ]
+  
+  Motifs = [
+    {r: 8,  g: 159,  b: 143},
+    {r: 0,  g: 137,  b: 138},
+    {r: 8,  g: 115,  b: 127},
+    {r: 33, g: 93,   b: 110},
+    {r: 43, g: 72,   b: 88},
+  ]
+  getMotifColor = number => {
+    if( number == 1){
+      return 1
+    }
+    const numColors = this.Motifs.length
+    let needle = 1
+    range(1,numColors,1).forEach( n =>{ 
+      if( number % n){
+        needle = n
+      }
+    })
+    return needle
   }
   public cleanup(){
     this.subs.forEach((x:any) => {
@@ -158,10 +204,9 @@ export default class MeanderCanvas extends Canvas {
     return this.config.motifConfig[input]
   }
   getAngleFromIndex(index:number, base:number){
-    // Convert to base and get the corresponding angle
     return index.toString(base)
       .split('')
-      .map( (x:any) => this.getAngleFromMotifConfig(parseInt(x)))
+      .map( (x:any) => this.config.motifConfig[parseInt(x)] )
       .reduce((acc: number, cur: number) => acc += cur , 0)
   }
   generateSpacing = (sides:number) => range(sides).map( n => n * ((Math.PI * 2)/sides));
