@@ -132,7 +132,7 @@ export default class MeanderCanvas extends Canvas {
           return this.getAngleFromIndex( x, this.config.motifConfig.length )
         })
         // console.log("Angle dict", angleDict)
-        let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip, angleDict)
+        let getAxis = this.triangulate(segmentLength, x, savedPos[n].sideAngle, this.config.flip)
         let newX = savedPos[n].x + getAxis('x')
         let newY = savedPos[n].y + getAxis('y')
 
