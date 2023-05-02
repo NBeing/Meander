@@ -34,8 +34,7 @@ export default class MeanderCanvas extends Canvas {
     this.lastTransY= this.lastY;
     this.clicks = 0;
     this.offset = [null,null];
-    // this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
-
+    window.addEventListener('resize', () => this.resizeCanvas(), false);
     this.init()
   }
   // zoom = (clicks:any) => {
@@ -64,35 +63,46 @@ export default class MeanderCanvas extends Canvas {
   // }
   update(config){
     this.config = config;
-    this.init()    
+    this.ctx.restore()
+    this.init()
   }  
+  resizeCanvas() {
+    this.ctx.canvas.width = window.innerWidth;
+    this.ctx.canvas.height = window.innerHeight;
+    this.draw();
+  }
   init(){
-    // console.log("i nit", this.config)
-    this.ctx.fillRect (0,0,this.canvas.width/2, this.canvas.height/2)
-    this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
-
+    // this.ctx.canvas.width  = window.innerWidth;
+    // this.ctx.canvas.height = window.innerHeight;
     this.ctx.save()
+    // console.log("i nit", this.config)
+    if(this.config.clearScreen){
+      this.ctx.fillRect (0,0,this.canvas.width, this.canvas.height)
+    }
+    // this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
+
+    // this.ctx.save()
     this.ctx.fillStyle = "black";
+    this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
     this.ctx.scale(0.15,0.15);
     this.ctx.transform(1,0,0,1,0,0)
 
-    this.ctx.fillStyle = "black"
-    this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height)
+    // this.ctx.fillStyle = "black"
+    // this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height)
 
-    this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
-    this.canvas.addEventListener('click', (evt:any) => {
+    // this.canvas.addEventListener('click', (evt:any) => {
 
-      this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
-      this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
-      this.offset = [this.lastX, this.lastY];
-      this.ctx.translate( this.lastX - this.canvas.width /2 , this.lastY - this.canvas.height /2 )
+    //   this.lastX = evt.offsetX || (evt.pageX - this.canvas.offsetLeft);
+    //   this.lastY = evt.offsetY || (evt.pageY - this.canvas.offsetTop);
+    //   this.offset = [this.lastX, this.lastY];
+    //   this.ctx.translate( this.lastX - this.canvas.width /2 , this.lastY - this.canvas.height /2 )
 
-      this.ctx.fillStyle = 'red';
-      this.ctx.fillRect(0,0,10, 10)
-      //console.log("Cleeeek", this.offset);
-      this.draw();
-    })
+    //   this.ctx.fillStyle = 'red';
+    //   this.ctx.fillRect(0,0,10, 10)
+    //   //console.log("Cleeeek", this.offset);
+    //   this.draw();
+    // })
     this.angle   = ((Math.PI * 2) / this.config.sides)
     this.draw();
   }
@@ -101,22 +111,22 @@ export default class MeanderCanvas extends Canvas {
 
 
     let savedPos = this.generateSpacing(this.config.sides).map((n:any,i:any, c:any) => {
-      let x  = this.config.sideLength * Math.sin(n)
-      let y  = this.config.sideLength * Math.cos(n)
-      let x1 = this.config.sideLength * Math.sin((c[i+1])? c[i+1] : c[0])
-      let y1 = this.config.sideLength * Math.cos((c[i+1])? c[i+1] : c[0])
+      let x  = this.config.sideLength * Math.sin(n + this.config.baseRotation)
+      let y  = this.config.sideLength * Math.cos(n + this.config.baseRotation)
+      let x1 = this.config.sideLength * Math.sin(((c[i+1])? c[i+1] : c[0]) + this.config.baseRotation)
+      let y1 = this.config.sideLength * Math.cos(((c[i+1])? c[i+1] : c[0]) + this.config.baseRotation)
       let a  = ( x1 - x )
       let b  = ( y1 - y )
-      let slope = b/a
-      let sideAngle = (a < 0) ? Math.PI + Math.atan(slope) : Math.atan(slope)
-      return { x , y , sideAngle }
+      let slope = (b/a)
+      let sideAngle = (a < 0) ? Math.PI + Math.atan(slope) : Math.atan(slope) 
+      return { x , y , sideAngle: sideAngle }
     })
 
     //let totalLength = this.config.sideLength * Math.pow(4/3, this.config.depth )
     let source:any;
-    let numberOfSegments  = Math.pow( this.config.motifConfig.length , this.config.depth);
+    let numberOfSegments  = Math.pow( this.config.motifConfig.length , this.config.depth * .01);
     let polygonSideLength = this.config.sideLength * 2 * Math.sin(this.angle/2)
-    let segmentLength     = polygonSideLength * Math.pow((1/3), this.config.depth)
+    let segmentLength     = polygonSideLength * Math.pow((1/3), this.config.depth * .01)
     let numSegments       = (this.config.fitToSide) ? numberOfSegments :  this.config.numSegments
     
     source =
@@ -145,16 +155,17 @@ export default class MeanderCanvas extends Canvas {
         let sin = scale(Math.sin);
         let cos = scale(Math.cos);
 
-        this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
-                      `rgba(${sin},${cos},${tan},1)`)
-
-        // const color = this.Motifs[this.getMotifColor(x) - 1]
-        // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
-        //   `rgba(${color.r},${color.g},${color.b},1)`)
-        // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
-        //   `rgba(${this.config.red},${this.config.green},${this.config.blue},1)`)
-    
-        // this.drawCircle(savedPos[n].x, savedPos[n].y,100,Math.PI , `rgba(${255},${cos},${tan},0.5)`, this.config.lineWidth);
+        const color = this.Motifs[this.getMotifColor(x) - 1]
+        const drawEvery = this.config.drawEvery
+        if (x % drawEvery == 0){
+          this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,            
+            `rgba(${color.r},${color.g},${color.b},.5)`)
+          // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+          //               `rgba(${sin},${cos},${tan},1)`)
+            // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+            //   `rgba(${this.config.red},${this.config.green},${this.config.blue},1)`)
+          // this.drawCircle(savedPos[n].x, savedPos[n].y,100,Math.PI , `rgba(${255},${cos},${tan},0.5)`, this.config.lineWidth);    
+        } 
         savedPos[n].x = newX;
         savedPos[n].y = newY;
 
@@ -196,9 +207,13 @@ export default class MeanderCanvas extends Canvas {
     })
   }
   triangulate =
-    ( segmentLength:number, count:number, baseRotation:number, flip: boolean) =>
-    (axis: string) => segmentLength * ( axis === 'x' ? Math.cos : Math.sin )
-                      ((flip ? -1 : 1) * this.getAngleFromIndex( count, this.config.motifConfig.length ) + baseRotation  );
+    ( segmentLength:number, count:number, baseRotation:number, flip: boolean ) =>
+      (axis: string) => {
+        const cosOrSin = axis === 'x' ? Math.cos : Math.sin
+        const shouldFlip = (flip ? -1 : 1)
+        const angle = this.getAngleFromIndex( count, this.config.motifConfig.length ) 
+        return segmentLength * (cosOrSin((shouldFlip * (angle + baseRotation)) ))
+      }
 
   getAngleFromMotifConfig( input:number){
     return this.config.motifConfig[input]

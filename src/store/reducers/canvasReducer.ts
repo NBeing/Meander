@@ -7,21 +7,32 @@ import {
 import { MotifDefinition, MotifModOptions, MotifOptionsReducerState } from "../../types"
 
 // Default Motif Config
-const motif:MotifDefinition = [0, Math.PI/2, -Math.PI/4, 0, 0, -Math.PI/3, -Math.PI/2, 0]
+const motif:MotifDefinition = [
+  0, 
+  Math.PI/2, 
+  -Math.PI/4, 
+  0, 
+  0, 
+  -Math.PI/3, 
+  -Math.PI/2, 
+  0
+]
 // Default options
 const config:MotifModOptions = 
- [{ optionName: 'depth'       , min: 0 , max:7     , value: 1     , type: 'range'    },
-  { optionName: 'sides'       , min: 2 , max:25    , value: 7     , type: 'range'    },
-  { optionName: 'lineWidth'   , min: 0 , max:400   , value: 10    , type: 'range'    },
-  { optionName: 'sideLength'  , min: 2 , max:1200  , value: 300   , type: 'range'    },
-  { optionName: 'baseRotation', min: 0 , max:2*Math.PI     , value: 0     , type: 'range'    },
-  { optionName: 'numSegments' , min: 2 , max:20000 , value: 30    , type: 'range'    },
-  { optionName: 'flip'        , min: 0 , max:1     , value: false , type: 'checkbox' },
-  { optionName: 'noAnimation' , min: 1 , max:9     , value: true  , type: 'checkbox' },
-  { optionName: 'fitToSide'   , min: 0 , max:1     , value: false , type: 'checkbox' },
-  { optionName: 'red'         , min: 0 , max:255   , value: 127    , type: 'range'    },
-  { optionName: 'green'       , min: 0 , max:255   , value: 10    , type: 'range'    },
-  { optionName: 'blue'        , min: 0 , max:255   , value: 50    , type: 'range'    },
+ [{ optionName: 'depth'       , min: -400 , max:2000  , value: 1     , type: 'range'    },
+  { optionName: 'sides'       , min: 2 ,    max:25    , value: 7     , type: 'range'    },
+  { optionName: 'lineWidth'   , min: 0 ,    max:400   , value: 10    , type: 'range'    },
+  { optionName: 'sideLength'  , min: 2 ,    max:1200  , value: 300   , type: 'range'    },
+  { optionName: 'baseRotation', min: 0 ,    max:90    , value: 0     , type: 'range'    },
+  { optionName: 'numSegments' , min: 2 ,    max:20000 , value: 30    , type: 'range'    },
+  { optionName: 'drawEvery'   , min: 1 ,    max:100   , value: 1     , type: 'range'    },
+  { optionName: 'flip'        , min: 0 ,    max:1     , value: false , type: 'checkbox' },
+  { optionName: 'noAnimation' , min: 1 ,    max:9     , value: true  , type: 'checkbox' },
+  { optionName: 'fitToSide'   , min: 0 ,    max:1     , value: false , type: 'checkbox' },
+  { optionName: 'clearScreen' , min: 0 ,    max:1     , value: true  , type: 'checkbox' },
+  { optionName: 'red'         , min: 0 ,    max:255   , value: 127   , type: 'range'    },
+  { optionName: 'green'       , min: 0 ,    max:255   , value: 10    , type: 'range'    },
+  { optionName: 'blue'        , min: 0 ,    max:255   , value: 50    , type: 'range'    },
 ]
 
 export const defaultCanvasState:MotifOptionsReducerState = { motifAngles:motif, motifModOptions:config }

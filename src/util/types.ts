@@ -11,19 +11,21 @@ export type CantorConfig = {
 }
 
 export type MeanderConfig = {
-  sides        : number,
+  noAnimation  : boolean,
   flip         : boolean,
+  fitToSide    : boolean,
+  sides        : number,
   sideLength   : number,
   depth        : number,
   baseRotation : number,
   numSegments  : number,
   lineWidth    : number,
   motifConfig  : any,
-  noAnimation  : boolean,
-  fitToSide    : boolean,
   red          : number,
   green        : number,
   blue         : number,
+  drawEvery    : number,
+  clearScreen  : boolean,
 }
 export type ConfigOption = {
   optionName : string,
