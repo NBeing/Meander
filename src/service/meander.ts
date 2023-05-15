@@ -162,8 +162,8 @@ export default class MeanderCanvas extends Canvas {
             `rgba(${color.r},${color.g},${color.b},.5)`)
           // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
           //               `rgba(${sin},${cos},${tan},1)`)
-            // this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
-            //   `rgba(${this.config.red},${this.config.green},${this.config.blue},1)`)
+            this.drawLine(savedPos[n].x, savedPos[n].y, newX, newY, this.config.lineWidth || 3,
+              `rgba(${this.config.red},${this.config.green},${this.config.blue},1)`)
           // this.drawCircle(savedPos[n].x, savedPos[n].y,100,Math.PI , `rgba(${255},${cos},${tan},0.5)`, this.config.lineWidth);    
         } 
         savedPos[n].x = newX;
