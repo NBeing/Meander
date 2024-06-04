@@ -21,7 +21,11 @@ export const hasKey = key => obj => obj[key]
 export const parseFloatByKey = key => obj => Object.assign({}, obj, { [key] :parseFloat(obj[key])})
 
 export const addOption = (acc:any, cur:any) => {
-    acc[cur.optionName] = cur.value
+    if(cur.type == 'checkbox'){
+      acc[cur.optionName] = cur.checked
+    } else {
+      acc[cur.optionName] = cur.value
+    }
     return acc
 }
 export const parseMeanderConfigToMeanderCanvasOptions =

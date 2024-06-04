@@ -72,24 +72,15 @@ export default class MeanderCanvas extends Canvas {
     this.draw();
   }
   init(){
-    // this.ctx.canvas.width  = window.innerWidth;
-    // this.ctx.canvas.height = window.innerHeight;
     this.ctx.save()
-    // console.log("i nit", this.config)
     if(this.config.clearScreen){
       this.ctx.fillRect (0,0,this.canvas.width, this.canvas.height)
     }
-    // this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
 
-    // this.ctx.save()
     this.ctx.fillStyle = "black";
     this.ctx.translate( this.canvas.width /2 , this.canvas.height/2 )
     this.ctx.scale(0.15,0.15);
     this.ctx.transform(1,0,0,1,0,0)
-
-    // this.ctx.fillStyle = "black"
-    // this.ctx.fillRect( 0, 0 , this.canvas.width , this.canvas.height)
-
 
     // this.canvas.addEventListener('click', (evt:any) => {
 
@@ -108,8 +99,6 @@ export default class MeanderCanvas extends Canvas {
   }
 
   draw(){
-
-
     let savedPos = this.generateSpacing(this.config.sides).map((n:any,i:any, c:any) => {
       let x  = this.config.sideLength * Math.sin(n + this.config.baseRotation)
       let y  = this.config.sideLength * Math.cos(n + this.config.baseRotation)
@@ -130,7 +119,7 @@ export default class MeanderCanvas extends Canvas {
     let numSegments       = (this.config.fitToSide) ? numberOfSegments :  this.config.numSegments
     
     source =
-      ( this.config.noAnimation )
+      ( !this.config.animate )
         ? Rx.Observable.from(range( numSegments ))
         : Rx.Observable.interval(1).take(numSegments)
 

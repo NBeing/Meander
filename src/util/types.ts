@@ -11,7 +11,7 @@ export type CantorConfig = {
 }
 
 export type MeanderConfig = {
-  noAnimation  : boolean,
+  animate      : boolean,
   flip         : boolean,
   fitToSide    : boolean,
   sides        : number,

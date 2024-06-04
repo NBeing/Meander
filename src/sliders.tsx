@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { UPDATE_CONFIG, UPDATE_MOTIF } from './store/actions/canvasActions';
 
+// This slider is for the motif options
 const useSlider = (type, min, max, defaultState, step, label, id, index) => {
   const [state, setSlide] = useState(defaultState);
   const dispatch = useDispatch()
@@ -25,24 +26,41 @@ const useSlider = (type, min, max, defaultState, step, label, id, index) => {
   }
   return props
 }
+const useConfigCheckbox = (type, min, max, defaultState, step, label, id, index, option, onUpdate) => {
+  const [state, setSlide] = useState(defaultState);
+  const dispatch = useDispatch()
+  const handleChange = e => {
+    let value 
+    value = e.target.checked
+
+    setSlide(value);
+    dispatch({
+      type: UPDATE_CONFIG, 
+      payload: { option: option, checked: e.target.checked }
+    })
+  }
+  const props = { 
+    type,
+    id,
+    min,
+    max,
+    step,
+    checked: state,
+    onChange: handleChange
+  }
+  return props
+}
 const useConfigSlider = (type, min, max, defaultState, step, label, id, index, option, onUpdate) => {
   const [state, setSlide] = useState(defaultState);
   const dispatch = useDispatch()
-
   const handleChange = e => {
     let value 
-    if(type == "checkbox"){
-
-      value = e.target.checked
-    } else {
-      value = e.target.value
-    }
+    value = e.target.value
     setSlide(value);
     dispatch({
       type: UPDATE_CONFIG, 
       payload: { option: option, value }
     })
-    // onUpdate()
   }
   const props = { 
     type,
@@ -56,11 +74,23 @@ const useConfigSlider = (type, min, max, defaultState, step, label, id, index, o
   return props
 }
 export function ConfigSlider(props){
-  const sliderProps = useConfigSlider(
+  const sliderProps = props.option.type !== 'checkbox' ? useConfigSlider(
     props.option.type, 
     props.option.min, 
     props.option.max, 
-    props.option.value, 
+    props.option.value,
+    1,
+    props.option.label, 
+    props.option.id, 
+    props.option.index,
+    props.option,
+    props.renderCanvas,
+  ) 
+  : useConfigCheckbox(
+    props.option.type, 
+    props.option.min, 
+    props.option.max, 
+    props.option.checked,
     1,
     props.option.label, 
     props.option.id, 
@@ -68,13 +98,25 @@ export function ConfigSlider(props){
     props.option,
     props.renderCanvas,
   );
-  return (
-    <div className="inputs">
-      <label>{props.option.optionName}</label>
-      <label>({props.option.value})</label>
-          <input {...sliderProps}/>
-      </div>
-  )
+  const _sliderProps = {...sliderProps, ...{checked: props.option.checked == true }}
+  if(props.option.type !== 'checkbox'){
+    return (
+      <div className="inputs">
+        <label>{props.option.optionName}</label>
+        <label>({props.option.value})</label>
+            <input {..._sliderProps}/>
+        </div>
+    )
+  } else { 
+    return (
+      <div className="inputs">
+        <label>{props.option.optionName}</label>
+        <label>({props.option.value})</label>
+            <input {..._sliderProps} checked={props.option.checked}/>
+        </div>
+    )
+
+  }
 }
 
 export function MotifSlider(props){

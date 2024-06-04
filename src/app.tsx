@@ -16,6 +16,7 @@ import { noteLengths, Knobs } from './knobs'
 
 import GlobalTimer from "./util/GlobalTimer"
 import { EventBus, MidiTracker } from "./util/eventBus"
+import { lerp, clamp, floorClamp, parabolic, impulse } from './util/smoothingFunctions'
 
 const globalTimer = new GlobalTimer()
 const eventBus = new EventBus()
@@ -88,20 +89,9 @@ const spawnTimer = (
 eventBus.subscribe("nameEvent", (func, num) => {
   if(typeof func === "function"){
     func()
-  } else {
-    console.log("Why not func")
-    debugger;
   }
 });
-const lerp = (a, b, t) => a + (b-a) * t
-const clamp = (val, max) => val > max ? max : val
-const floorClamp = (val, min) => val < min ? min : val
-const parabolic = (x,k) => Math.pow( 4.0*x*(1.0-x), k );
-//  www.iquilezles.org/www/articles/functions/functions.htm
-const impulse = ( howSteep, x ) => {
-  let h = howSteep*x;
-  return h* Math.exp(1.0 - h);
-}
+
 // These values may be for the BSP and not universal
 const MIDI_STOP_MSG = 252
 
@@ -279,101 +269,101 @@ const App = (props) => {
     const depthLFO = new LFO(-500, 200, 20)
 
 
+    // Redraws the canvas with the browser framerate
     // window.requestAnimationFrame(function(){
     // });
-    // Redraws the canvas with the browser framerate
     const mainLoop = () => {
       updateTimers(globalTimer.getSecondsElapsed())
 
       // console.log("myLFO", myLFO.getSin());      
-    //   if(
-    //     motifModOptions.filter( (option) => { return option.optionName === "noAnimation"})[0].value == false
-    //     ){  
-    //     const configMod = [
-    //       myLFO3.getSin() / 2, 
-    //       myLFO3.getSin() / 3,
-    //       myLFO3.getSin() / 4,
-    //       myLFO3.getSin() / 5,
-    //       myLFO3.getSin() / 2,
-    //       myLFO3.getSin() / 3,
-    //       myLFO3.getSin() / 4,
-    //       myLFO3.getSin() / 5,
-    //     ]
-    //     dispatch({
-    //       type: UPDATE_ALL_MOTIFS, 
-    //       payload: [ 
-    //         myLFO3.getSin() + configMod[0], 
-    //         myLFO3.getSin() + configMod[1],
-    //         myLFO3.getSin() + configMod[2],
-    //         myLFO3.getSin() + configMod[3],
-    //         myLFO3.getSin() + configMod[4],
-    //         myLFO3.getSin() + configMod[5],
-    //         myLFO3.getSin() + configMod[6],
-    //         myLFO3.getSin() + configMod[7],
-    //       ]
-    //     })
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option:           
-    //         { optionName: 'sideLength'  , min: 2 , max:1200  , value: 300   , type: 'range' },
-    //         value: myLFO4.getSin() / 4
-    //     }
-    //     })
-    //     // dispatch({
-    //     //   type: UPDATE_CONFIG, 
-    //     //   payload:{
-    //     //   option:           
-    //     //   { optionName: 'lineWidth'   , min: 0 , max:400   , value: 10    , type: 'range'    },
-    //     //   value: myLFO4.getSin() / 2
-    //     // }
-    //     // })
+      // if(
+      //   motifModOptions.filter( (option) => { return option.optionName === "animate"})[0].value == false
+      //   ){  
+      //   const configMod = [
+      //     myLFO3.getSin() / 2, 
+      //     myLFO3.getSin() / 3,
+      //     myLFO3.getSin() / 4,
+      //     myLFO3.getSin() / 5,
+      //     myLFO3.getSin() / 2,
+      //     myLFO3.getSin() / 3,
+      //     myLFO3.getSin() / 4,
+      //     myLFO3.getSin() / 5,
+      //   ]
+      //   dispatch({
+      //     type: UPDATE_ALL_MOTIFS, 
+      //     payload: [ 
+      //       myLFO3.getSin() + configMod[0], 
+      //       myLFO3.getSin() + configMod[1],
+      //       myLFO3.getSin() + configMod[2],
+      //       myLFO3.getSin() + configMod[3],
+      //       myLFO3.getSin() + configMod[4],
+      //       myLFO3.getSin() + configMod[5],
+      //       myLFO3.getSin() + configMod[6],
+      //       myLFO3.getSin() + configMod[7],
+      //     ]
+      //   })
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option:           
+      //       { optionName: 'sideLength'  , min: 2 , max:1200  , value: 300   , type: 'range' },
+      //       value: myLFO4.getSin() / 4
+      //   }
+      //   })
+      //   // dispatch({
+      //   //   type: UPDATE_CONFIG, 
+      //   //   payload:{
+      //   //   option:           
+      //   //   { optionName: 'lineWidth'   , min: 0 , max:400   , value: 10    , type: 'range'    },
+      //   //   value: myLFO4.getSin() / 2
+      //   // }
+      //   // })
   
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option:           
-    //         { optionName: 'red'  , min: 0 , max:255  , value: 300   , type: 'range' },
-    //         value: colorLFORed.getSin()
-    //     }
-    //     })
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option:           
-    //         { optionName: 'green'  , min: 0 , max:255  , value: 300   , type: 'range' },
-    //         value: colorLFOGreen.getSin(),
-    //     }
-    //     })
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option:           
-    //         { optionName: 'blue'  , min: 0 , max:255  , value: 300   , type: 'range' },
-    //         value: colorLFOBlue.getSin(),
-    //     }
-    //     })
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option: {
-    //           max: 20000,
-    //           min: 2,
-    //           optionName: "numSegments",
-    //           type: "range",
-    //           value: 1057,
-    //         },
-    //         value: myLFO2.getSin()
-    //     }
-    //     })
-    //     dispatch({
-    //       type: UPDATE_CONFIG, 
-    //       payload:{
-    //       option: { optionName: 'depth'       , min: -1000 , max:2000  , value: 1     , type: 'range'    },
-    //         value: depthLFO.getSin()
-    //     }
-    //     })
-    //   }
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option:           
+      //       { optionName: 'red'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //       value: colorLFORed.getSin()
+      //   }
+      //   })
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option:           
+      //       { optionName: 'green'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //       value: colorLFOGreen.getSin(),
+      //   }
+      //   })
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option:           
+      //       { optionName: 'blue'  , min: 0 , max:255  , value: 300   , type: 'range' },
+      //       value: colorLFOBlue.getSin(),
+      //   }
+      //   })
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option: {
+      //         max: 20000,
+      //         min: 2,
+      //         optionName: "numSegments",
+      //         type: "range",
+      //         value: 1057,
+      //       },
+      //       value: myLFO2.getSin()
+      //   }
+      //   })
+      //   dispatch({
+      //     type: UPDATE_CONFIG, 
+      //     payload:{
+      //     option: { optionName: 'depth'       , min: -1000 , max:2000  , value: 1     , type: 'range'    },
+      //       value: depthLFO.getSin()
+      //   }
+      //   })
+      // }
 
     }
     var elapsed = 0

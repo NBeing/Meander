@@ -25,9 +25,12 @@ const Config = (props) => {
   const dispatch = useDispatch()
   
   const generateInputs = () => {
-    return motifModOptions.map( ( option:any ,i:number ) => (
-      <ConfigSlider key={i} option={option} />
-    ))
+    return motifModOptions.map( ( option:any ,i:number ) => {
+      console.log("Optchin", option)
+      return (
+        <ConfigSlider key={i} option={option} />
+      )
+    })
   }
   const generateMotifInputs = () => {
     return range(8).map( (option:any, i:number ) =>{

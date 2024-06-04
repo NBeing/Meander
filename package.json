@@ -4,7 +4,8 @@
   "description": "Meander Fractal Generator",
   "scripts": {
     "start": "webpack serve",
-    "cli": "webpack serve --mode development --open"
+    "cli": "webpack serve --mode development --open",
+    "build":"webpack build"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",

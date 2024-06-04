@@ -1,4 +1,7 @@
 // https://lwebapp.com/en/post/event-bus
+
+// each event is really a tick, we add events onto the tick
+// and iterate through all of the events on the tick
 export class EventBus {
   constructor() {
     // initialize event list
@@ -8,10 +11,8 @@ export class EventBus {
   }
   // publish event
   publish(eventName, ...args) {
-    // console.log("publishing", eventName)
     // Get all the callback functions of the current event
     const callbackObject = this.eventObject[eventName];
-    // console.log("Event object", this.eventObject)
     if (!callbackObject) return console.warn(eventName + " not found!");
 
     // execute each callback function
